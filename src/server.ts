@@ -4,8 +4,8 @@ const app = express();
 
 app.use(express.json());
 
-app.get("/users",(request, response)=>{
-    response.send("hello Word");
+app.get("/",(request, response)=>{
+    response.json({message: "Hello Word"})
 });
 
 
