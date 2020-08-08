@@ -19,7 +19,11 @@ router.post("/classes", async(request, response)=>{
         cost,
         schedule
     } = request.body;
-   const inserteUserIds = await db('users').insert({
+
+    const trx = await db.transaction();
+
+   try{
+    const inserteUserIds = await trx('users').insert({
         name,
         avatar,
         whatsapp,
@@ -27,7 +31,7 @@ router.post("/classes", async(request, response)=>{
     });
     const user_id = inserteUserIds[0];
 
-    const inserteClassesIds = await db('classes').insert({
+    const inserteClassesIds = await trx('classes').insert({
         subject,
         cost,
         user_id,
@@ -44,8 +48,20 @@ router.post("/classes", async(request, response)=>{
         };
 
     });
-    await db('class_schedule').insert(classSchedule);
-    return response.send();
+    await trx('class_schedule').insert(classSchedule);
+
+    await trx.commit();
+    
+    return response.status(201).send();
+
+   }catch(err){
+       await trx.rollback();
+       return response.status(400).json({
+           error:'Unexpected error while creating new  class'
+       })
+   }
+
+    
 });
 
 export default router;
