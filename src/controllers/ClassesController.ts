@@ -21,8 +21,11 @@ export default class ClassesController {
         }
         const timeInMinutes = convertHourToMinutes(filters.time as string);
 
-        console.log(timeInMinutes);
-        return response.send();
+        const classes = await db('classes')
+            .where('classes.subject','=',filters.subject as string)
+            .join('users','classes.user_id','=','users.id')
+            .select(['classes.*','users.*']);
+        return response.json(classes);
     }
     async create(request:Request, response:Response){
         const {
